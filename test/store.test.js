@@ -1,14 +1,14 @@
 const assert = require('assert');
 const Store = require('../lib/store');
-const uniqid = require('uniqid');
 
 
 describe('store methods', () => {
 
     let testStore;
+    let toSave;
     beforeEach(() => {
         testStore = new Store();
-        const toSave = [{
+        toSave = [{
             name: 'journey',
             breed: 'staffordshire terrier',
             talent: 'head-size'
@@ -23,39 +23,41 @@ describe('store methods', () => {
         }];
     });
 
-    it('save function', () => {
+    function loadAll(){
+        testStore.save(toSave[0]);
+        testStore.save(toSave[1]);
+        testStore.save(toSave[2]);
+    }
+
+    it('save function with new id', () => {
         const returned = testStore.save(toSave[0]);
-    
-        assert.deepEqual(returned, {
-            _id: `${_id}`,
-            name: 'journey',
-            breed: 'staffordshire terrier',
-            talent: 'head-size'
-        });
+
+        assert.ok(returned._id, true);
+    });
+
+    it('save function returning given object', () => {
+        const returned = testStore.save(toSave[0]);
+
+        assert.deepEqual(returned.name, 'journey');
     });
 
     it('get function by id', () => {
-        testStore.save(toSave[0]);
+        loadAll();
+        const _someID = testStore.memory[0]._id;
         const returned = testStore.get(_someID);
-    
-        assert.deepEqual(returned, {
-            _id: '_someID',
-            name: 'journey',
-            breed: 'staffordshire terrier',
-            talent: 'head-size'
-        });
+
+        assert.deepEqual(returned.name, 'journey');
     });
 
     it('get function, no result returns null', () => {
-        const returned = testStore.get(_someID);
+        loadAll();
+        const returned = testStore.get('your mom');
     
         assert.deepEqual(returned, null);
     });
 
     it('getAll function', () => {
-        testStore.save(toSave[0]);
-        testStore.save(toSave[1]);
-        testStore.save(toSave[2]);
+        loadAll();
         
         const returned = testStore.getAll();
     
@@ -69,15 +71,18 @@ describe('store methods', () => {
     });
 
     it('remove function, true', () => {
+        loadAll();
+        const _someID = testStore.memory[0]._id;
         const returned = testStore.remove(_someID);
     
-        assert.deepEqual(returned, true);
+        assert.deepEqual(returned, { removed: true });
     });
 
     it('remove function, false', () => {
-        const returned = testStore.remove(_someID);
+
+        const returned = testStore.remove('your mom');
     
-        assert.deepEqual(returned, false);
+        assert.deepEqual(returned, { removed: false });
     });
 
 });
